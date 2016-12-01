@@ -12,7 +12,7 @@ extern "C" {
 #define BNO055_SAMPLERATE_DELAY_MS (1000)
 
 Adafruit_BNO055 bno1 = Adafruit_BNO055(55);
-Adafruit_BNO055 bno2 = Adafruit_BNO055(54);
+Adafruit_BNO055 bno2 = Adafruit_BNO055();
 
 void displaySensorDetails(Adafruit_BNO055*bno)
 {
@@ -44,7 +44,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("Orientation Sensor Test"); Serial.println("");
   /* Initialise the 1st sensor */
- //tcaselect(3);
+  tcaselect(0);
   if (!bno1.begin())
   {
     /* There was a problem detecting the HMC5883 ... check your connections */
@@ -60,10 +60,10 @@ void setup()
     while (1);
   }
 //  /* Display some basic information on this sensor */
-  tcaselect(3);
+ // tcaselect(3);
   displaySensorDetails(&bno1);
-  tcaselect(7);
-  displaySensorDetails(&bno2);
+  //tcaselect(7);
+ // displaySensorDetails(&bno2);
 }
 
 void loop()
@@ -81,7 +81,7 @@ void loop()
   Serial.print((float)event.orientation.z);
   Serial.println(F(""));
 
-  /* Also send calibration data for each sensor. */
+  /* Also send calibration data for each sensor. 
   uint8_t sys, gyro, accel, mag = 0;
   bno1.getCalibration(&sys, &gyro, &accel, &mag);
   Serial.print(F("Calibration: "));
@@ -98,7 +98,7 @@ void loop()
    bno2.getEvent(&event);
 
 
-  /* The processing sketch expects data as roll, pitch, heading */
+  The processing sketch expects data as roll, pitch, heading 
   Serial.print(F("Orientation 2: "));
   Serial.print((float)event.orientation.x);
   Serial.print(F(" "));
@@ -107,7 +107,7 @@ void loop()
   Serial.print((float)event.orientation.z);
   Serial.println(F(""));
 
-  /* Also send calibration data for each sensor. */
+   Also send calibration data for each sensor. 
 
   bno2.getCalibration(&sys, &gyro, &accel, &mag);
   Serial.print(F("Calibration 2: "));
@@ -117,7 +117,7 @@ void loop()
   Serial.print(F(" "));
   Serial.print(accel, DEC);
   Serial.print(F(" "));
-  Serial.println(mag, DEC);
+  Serial.println(mag, DEC);*/
    
   delay(BNO055_SAMPLERATE_DELAY_MS);
  
