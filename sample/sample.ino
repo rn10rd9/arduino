@@ -12,7 +12,7 @@ extern "C" {
 #define BNO055_SAMPLERATE_DELAY_MS (1000)
 
 Adafruit_BNO055 bno1 = Adafruit_BNO055(55);
-Adafruit_BNO055 bno2 = Adafruit_BNO055();
+
 
 void displaySensorDetails(Adafruit_BNO055*bno)
 {
@@ -41,29 +41,42 @@ void tcaselect(uint8_t i) {
 // standard Arduino setup()
 void setup()
 {
+  while (!Serial);
+  delay(1000);
+
+  Wire.begin();
+  
   Serial.begin(115200);
   Serial.println("Orientation Sensor Test"); Serial.println("");
   /* Initialise the 1st sensor */
-  tcaselect(0);
-  if (!bno1.begin())
+
+  for (uint8_t t=0; t<8; t++)
   {
-    /* There was a problem detecting the HMC5883 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while (1);
+    tcaselect(t);
+    Serial.print("TCA Port #"); Serial.println(t);
+
+    for (uint8_t addr =0; addr<=127; addr++)
+    {
+      if (addr == TCAADDR) continue;
+
+      uint8_t data;
+      if (! twi_writeTo(addr, &data, 0, 1,1))
+      {
+        Serial.print("Found Sensor") ;
+        if (!bno1.begin())
+        {
+          /* There was a problem detecting the HMC5883 ... check your connections */
+          Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+          while (1);
+        } 
+        displaySensorDetails(&bno1);
+      }
+    }
   }
-//  /* Initialise the 2nd sensor */
- // tcaselect(7);
-  if (!bno2.begin())
-  {
-    /* There was a problem detecting the HMC5883 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while (1);
-  }
-//  /* Display some basic information on this sensor */
- // tcaselect(3);
-  displaySensorDetails(&bno1);
-  //tcaselect(7);
- // displaySensorDetails(&bno2);
+ 
+
+ 
+
 }
 
 void loop()
