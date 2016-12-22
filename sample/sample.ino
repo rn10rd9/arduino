@@ -12,28 +12,25 @@ extern "C" {
 
 
 
-float data[2][3];
+float data[3];
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (1000)
+#define BNO055_SAMPLERATE_DELAY_MS (3000)
 
 Adafruit_BNO055 bno1 = Adafruit_BNO055(55);
 Adafruit_BNO055 bno2 = Adafruit_BNO055(54);
 
-void printData(float data[2][3])
+void printData(float d[3])
 {
   int i, j;
 
   Serial.print("\nCoordinates are");
-  for (i = 0; i < numSensors; i++)
+  for (j = 0; j < numCoordinates; j++)
   {
-    for (j = 0; j < numCoordinates; j++)
-    {
-      Serial.print(" ");
-      Serial.print(data[i][j]);
-    }
-    Serial.println();
+    Serial.print(" ");
+    Serial.print(d[j]);
   }
+  Serial.println();
 }
 
 float getCoordinates(int coor, sensors_event_t event)
@@ -58,34 +55,16 @@ float getCoordinates(int coor, sensors_event_t event)
 void collectData(sensors_event_t event)
 {
   int i, j;
-  float data[2][3];
+  float data[3];
 
-  for (i = 0; i < numSensors; i++)
+  for (j = 0; j < numCoordinates; j++)
   {
-    for (j = 0; j < numCoordinates; j++)
-    {
-      data[i][j] = getCoordinates(j, event);
-    }
+    data[j] = getCoordinates(j, event);
   }
-
   printData(data);
 }
 
-void displaySensorDetails(Adafruit_BNO055*bno)
-{
-  sensor_t sensor;
-  bno->getSensor(&sensor);
-  Serial.println("------------------------------------");
-  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
-  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
-  Serial.println("------------------------------------");
-  Serial.println("");
-  delay(500);
-}
+
 void tcaselect(uint8_t i) {
   if (i > 7) return;
 
@@ -132,20 +111,30 @@ void loop()
   tcaselect(0);
   bno1.getEvent(&event);
 
+  // Quaternion data
+  imu::Quaternion quat = bno1.getQuat();
+
+
+
   /* The processing sketch expects data as roll, pitch, heading */
   Serial.print(F("\nOrientation 1: "));
-  Serial.print((float)event.orientation.x);
-  Serial.print(F(" "));
-  Serial.print((float)event.orientation.y);
-  Serial.print(F(" "));
-  Serial.print((float)event.orientation.z);
-  Serial.println(F(""));
-  collectData(event);
+  // Quaternion data
+  Serial.print("qW: ");
+  Serial.print(quat.w(), 4);
+  Serial.print(" qX: ");
+  Serial.print(quat.y(), 4);
+  Serial.print(" qY: ");
+  Serial.print(quat.x(), 4);
+  Serial.print(" qZ: ");
+  Serial.print(quat.z(), 4);
+  Serial.print("\t\t");
+
+
 
   delay(BNO055_SAMPLERATE_DELAY_MS);
+
   tcaselect(7);
   bno2.getEvent(&event);
-
 
   //  The processing sketch expects data as roll, pitch, heading
   Serial.print(F("\nOrientation 2: "));
@@ -155,7 +144,7 @@ void loop()
   Serial.print(F(" "));
   Serial.print((float)event.orientation.z);
   Serial.println(F(""));
-  collectData(event);
+  //collectData(event);
 
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
