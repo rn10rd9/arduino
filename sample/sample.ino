@@ -15,7 +15,7 @@ extern "C" {
 float data[3];
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (3000)
+#define BNO055_SAMPLERATE_DELAY_MS (1000)
 
 Adafruit_BNO055 bno1 = Adafruit_BNO055(55);
 Adafruit_BNO055 bno2 = Adafruit_BNO055(54);
@@ -85,7 +85,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("Orientation Sensor Test"); Serial.println("");
   /* Initialise the 1st sensor */
-  tcaselect(0);
+  tcaselect(2);
   if (!bno1.begin())
   {
     /* There was a problem detecting the BNO05 ... check your connections */
@@ -108,11 +108,11 @@ void loop()
   /* Get a new sensor event */
   sensors_event_t event;
 
-  tcaselect(0);
+  tcaselect(2);
   bno1.getEvent(&event);
 
   // Quaternion data
-  imu::Quaternion quat = bno1.getQuat();
+  imu::Quaternion quat1 = bno1.getQuat();
 
 
 
@@ -120,13 +120,13 @@ void loop()
   Serial.print(F("\nOrientation 1: "));
   // Quaternion data
   Serial.print("qW: ");
-  Serial.print(quat.w(), 4);
+  Serial.print(quat1.w(), 4);
   Serial.print(" qX: ");
-  Serial.print(quat.y(), 4);
+  Serial.print(quat1.y(), 4);
   Serial.print(" qY: ");
-  Serial.print(quat.x(), 4);
+  Serial.print(quat1.x(), 4);
   Serial.print(" qZ: ");
-  Serial.print(quat.z(), 4);
+  Serial.print(quat1.z(), 4);
   Serial.print("\t\t");
 
 
@@ -135,18 +135,22 @@ void loop()
 
   tcaselect(7);
   bno2.getEvent(&event);
+   // Quaternion data
+  imu::Quaternion quat2 = bno2.getQuat();
 
   //  The processing sketch expects data as roll, pitch, heading
+  Serial.print(F("\nOrientation 2: "));
   Serial.print("qW: ");
-  Serial.print(quat.w(), 4);
+  Serial.print(quat2.w(), 4);
   Serial.print(" qX: ");
-  Serial.print(quat.y(), 4);
+  Serial.print(quat2.y(), 4);
   Serial.print(" qY: ");
-  Serial.print(quat.x(), 4);
+  Serial.print(quat2.x(), 4);
   Serial.print(" qZ: ");
-  Serial.print(quat.z(), 4);
+  Serial.print(quat2.z(), 4);
   Serial.print("\t\t");
   //collectData(event);
+  Serial.print("\n");
 
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
