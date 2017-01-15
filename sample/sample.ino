@@ -137,13 +137,15 @@ void loop()
   bno2.getEvent(&event);
 
   //  The processing sketch expects data as roll, pitch, heading
-  Serial.print(F("\nOrientation 2: "));
-  Serial.print((float)event.orientation.x);
-  Serial.print(F(" "));
-  Serial.print((float)event.orientation.y);
-  Serial.print(F(" "));
-  Serial.print((float)event.orientation.z);
-  Serial.println(F(""));
+  Serial.print("qW: ");
+  Serial.print(quat.w(), 4);
+  Serial.print(" qX: ");
+  Serial.print(quat.y(), 4);
+  Serial.print(" qY: ");
+  Serial.print(quat.x(), 4);
+  Serial.print(" qZ: ");
+  Serial.print(quat.z(), 4);
+  Serial.print("\t\t");
   //collectData(event);
 
   delay(BNO055_SAMPLERATE_DELAY_MS);
