@@ -8,60 +8,72 @@ extern "C" {
 
 #define TCAADDR 0x70
 #define numSensors 2
-#define numCoordinates 3
+#define numCoordinates 4
 
 
 
-float data[3];
+//float data[3];
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (1000)
+#define BNO055_SAMPLERATE_DELAY_MS (500)
 
 Adafruit_BNO055 bno1 = Adafruit_BNO055(55);
 Adafruit_BNO055 bno2 = Adafruit_BNO055(54);
 
-void printData(float d[3])
+void sendData(float d[4])
 {
   int i, j;
 
-  Serial.print("\nCoordinates are");
+ // Serial.print("\nCoordinates are");
   for (j = 0; j < numCoordinates; j++)
   {
-    Serial.print(" ");
-    Serial.print(d[j]);
+    //Serial.print(" ");
+    Serial.print(d[j], 4);
   }
-  Serial.println();
+  //Serial.println();
 }
 
-float getCoordinates(int coor, sensors_event_t event)
+void getCoordinates(int coor, imu::Quaternion quat)
 {
-  float coordinates = 0.0;
+  float coordinates = -55555.55;
 
   switch (coor)
   {
     case 0:
-      coordinates = (float)event.orientation.x;
+      //coordinates = quat.w();
+      Serial.println(quat.w());
+     
       break;
     case 1:
-      coordinates = (float)event.orientation.y;
+      //coordinates = quat.x();
+      Serial.println(quat.x());;
       break;
     case 2:
-      coordinates = (float)event.orientation.z;
+      //coordinates = quat.y();
+      Serial.println(quat.y());
       break;
+    case 3:
+      //coordinates = quat.z();
+      Serial.println(quat.z());
+      break;
+
+      
   }
   return coordinates;
 }
 
-void collectData(sensors_event_t event)
+void collectData(imu::Quaternion quat)
 {
   int i, j;
-  float data[3];
+  float data[4];
+ 
 
   for (j = 0; j < numCoordinates; j++)
   {
-    data[j] = getCoordinates(j, event);
+    getCoordinates(j, quat);
   }
-  printData(data);
+
+  //return data;
 }
 
 
@@ -83,16 +95,18 @@ void setup()
   Wire.begin();
 
   Serial.begin(115200);
-  Serial.println("Orientation Sensor Test"); Serial.println("");
+  //Serial.println("Orientation Sensor Test"); Serial.println("");
   /* Initialise the 1st sensor */
-  tcaselect(2);
+  //Serial.println("HERE");
+  tcaselect(0);
+  //Serial.println("HERE");
   if (!bno1.begin())
   {
     /* There was a problem detecting the BNO05 ... check your connections */
     Serial.println("Ooops, no BNO05... Check your wiring!");
     while (1);
   }
-
+  //Serial.println("HERE TOO");
   tcaselect(7);
   if (!bno2.begin())
   {
@@ -108,49 +122,55 @@ void loop()
   /* Get a new sensor event */
   sensors_event_t event;
 
-  tcaselect(2);
+  tcaselect(0);
   bno1.getEvent(&event);
+  //Serial.println("Check your wiring!");
 
   // Quaternion data
   imu::Quaternion quat1 = bno1.getQuat();
-
-
-
-  /* The processing sketch expects data as roll, pitch, heading */
-  Serial.print(F("\nOrientation 1: "));
-  // Quaternion data
-  Serial.print("qW: ");
-  Serial.print(quat1.w(), 4);
-  Serial.print(" qX: ");
-  Serial.print(quat1.y(), 4);
-  Serial.print(" qY: ");
-  Serial.print(quat1.x(), 4);
-  Serial.print(" qZ: ");
-  Serial.print(quat1.z(), 4);
-  Serial.print("\t\t");
-
-
-
-  delay(BNO055_SAMPLERATE_DELAY_MS);
-
+  
   tcaselect(7);
   bno2.getEvent(&event);
-   // Quaternion data
+    
+  // Quaternion data
   imu::Quaternion quat2 = bno2.getQuat();
 
-  //  The processing sketch expects data as roll, pitch, heading
-  Serial.print(F("\nOrientation 2: "));
-  Serial.print("qW: ");
-  Serial.print(quat2.w(), 4);
-  Serial.print(" qX: ");
-  Serial.print(quat2.y(), 4);
-  Serial.print(" qY: ");
-  Serial.print(quat2.x(), 4);
-  Serial.print(" qZ: ");
-  Serial.print(quat2.z(), 4);
-  Serial.print("\t\t");
-  //collectData(event);
-  Serial.print("\n");
+  float* data1;
+  float* data2;
+ 
 
-  delay(BNO055_SAMPLERATE_DELAY_MS);
+  /* The processing sketch expects data as roll, pitch, heading */
+    //Serial.print(F("\nOrientation 1: "));
+//    Serial.print("qW: ");
+//    Serial.print(quat1.w(), 4);
+//    Serial.print(" qX: ");
+//   Serial.print(quat1.y(), 4);
+//    Serial.print(" qY: ");
+//    Serial.print(quat1.x(), 4);
+//    Serial.print(" qZ: ");
+//    Serial.print(quat1.z(), 4);
+//    Serial.print("\t\t");
+      collectData(quat1);
+    
+    //Serial.print("\n");
+    delay(BNO055_SAMPLERATE_DELAY_MS);
+    
+
+  //  The processing sketch expects data as roll, pitch, heading
+    //Serial.print(F("\nOrientation 2: "));
+//    Serial.print("qW: ");
+//      Serial.print(quat2.w(), 4);
+//    Serial.print(" qX: ");
+//      Serial.print(quat2.y(), 4);
+//    Serial.print(" qY: ");
+//    Serial.print(quat2.x(), 4);
+//    Serial.print(" qZ: ");
+//    Serial.print(quat2.z(), 4);
+//    Serial.print("\t\t");
+//    //collectData(event);*/
+    collectData(quat2);
+    //sendData(collectData(quat2));
+    //Serial.print("\n");
+    delay(BNO055_SAMPLERATE_DELAY_MS);
+  
 }
